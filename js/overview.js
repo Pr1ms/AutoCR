@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useEffect, useState, useRef, useLayoutEffect, useMemo, Fragment } from 'react';
 import { Achievement, AchievementSet, CodeNoteSet, RichPresence, CodeNote, AssetState, Leaderboard } from './achievements';
 import { assess_code_notes, assess_achievement, assess_leaderboard, assess_rich_presence, assess_set, SEVERITY_TO_CLASS, Feedback, FeedbackSeverity, toDisplayHex } from './feedback';
-import { ReqFlag, ConditionFormatter, ReqType, MemSize } from './logic';
+import { Logic, ReqFlag, ConditionFormatter, ReqType, MemSize } from './logic';
 import { LogicExplainer } from './explainer';
 
 const sidebar = createRoot(document.getElementById('list-body'));
