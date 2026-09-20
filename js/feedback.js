@@ -1,3 +1,4 @@
+import  { Fragment } from 'react';
 import { BitProficiency, PAUSERESET, ReqFlag, ReqType, ReqAddrType, ReqOperand, ConditionFormatter, PartialAccess, MemSize } from "./logic";
 import { Leaderboard, AssetState, RichPresence } from "./achievements";
 
@@ -1398,9 +1399,9 @@ function* check_notes_enum_hex(current)
 			yield new Issue(Feedback.NOTE_ENUM_HEX, note,
 				<ul>
 					<li>Code note at <code className="ref-link" data-ref={note.addr}>{toDisplayHex(note.addr)}</code>: <code>{note.getHeader()}</code></li>
-					<li>Found potential hex values: {found.map((x, i) => <React.Fragment key={i}>
+					<li>Found potential hex values: {found.map((x, i) => <Fragment key={i}>
 						{i == 0 ? '' : ', '} <code>{x}</code>
-					</React.Fragment>)}</li>
+					</Fragment>)}</li>
 				</ul>);
 	}
 }
@@ -1419,9 +1420,9 @@ function* check_notes_enum_size_mismatch(current)
 				<ul>
 					<li>Code note at <code className="ref-link" data-ref={note.addr}>{toDisplayHex(note.addr)}</code>: <code>{note.getHeader()}</code></li>
 					<li>The code note is listed as <code>{note.type.name}</code>, which has a max value of <code>0x{(note.type.maxvalue.toString(16).toUpperCase())}</code></li>
-					<li>The following enumerated values are too large for this code note: {found.map((x, i) => <React.Fragment key={i}>
+					<li>The following enumerated values are too large for this code note: {found.map((x, i) => <Fragment key={i}>
 						{i == 0 ? '' : ', '} <code>{x}</code>
-					</React.Fragment>)}</li>
+					</Fragment>)}</li>
 				</ul>
 			);
 	}
@@ -1575,9 +1576,9 @@ function* check_rp_lookups(current) {
 		
 		let caseCollisions = current.rp.scriptLookups.filter(x => x !== lookup && x.name.toLowerCase() === lookup.name.toLowerCase() && x.name !== lookup.name);
 		if (caseCollisions.length > 0 && caseCollisions.every(x => lookup.name < x)) {
-			let conflictList = <React.Fragment>{caseCollisions.map((x, i) => 
-				<React.Fragment key={i}>{i == 0 ? '' : ', '} <code>{x}</code></React.Fragment>
-			)}</React.Fragment>;
+			let conflictList = <Fragment>{caseCollisions.map((x, i) => 
+				<Fragment key={i}>{i == 0 ? '' : ', '} <code>{x}</code></Fragment>
+			)}</Fragment>;
 			yield new Issue(Feedback.RP_MACRO_CASE_COLLISION, lookup, <ul>
 				<li>Macro <code>{lookup.name}</code> conflicts with {conflictList}</li>
 			</ul>);
@@ -1671,7 +1672,7 @@ function* check_rp_display_strings(current) {
 			
 			let exactMatch = current.rp.scriptLookups.some(x => x.name === part.text);
 			if (!exactMatch) {
-				let suggestion = <React.Fragment></React.Fragment>;
+				let suggestion = <Fragment></Fragment>;
 				let caseMatch = current.rp.scriptLookups.find(x => x.name.toLowerCase() === part.text.toLowerCase());
 				if (caseMatch) suggestion = <ul>
 						<li><em>Did you mean <code>&#123;{caseMatch.name}&#125;</code>? Macro names are case-sensitive.</em></li>
