@@ -1556,14 +1556,14 @@ function* validate_macro_logic(part, ds) {
 	}
 }
 
-function* check_rp_lookups(current) {
+function* check_rp_lookups(rp) {
 	const builtInMacros = new Set(['Number', 'Unsigned', 'Score', 'Centiseconds', 'Seconds', 'Minutes', 'Fixed1', 'Fixed2', 'Fixed3', 'Float1', 'Float2', 'Float3', 'Float4', 'Float5', 'Float6', 'ASCIIChar', 'UnicodeChar']);
 	
 	let usedMacros = new Set();
-	current.rp.displayStrings.forEach(ds => ds.parts.filter(p => p.isMacro).forEach(p => usedMacros.add(p.text)));
+	rp.displayStrings.forEach(ds => ds.parts.filter(p => p.isMacro).forEach(p => usedMacros.add(p.text)));
 
-	for (let i = 0; i < current.rp.scriptLookups.length; i++) {
-		let lookup = current.rp.scriptLookups[i];
+	for (let i = 0; i < rp.scriptLookups.length; i++) {
+		let lookup = rp.scriptLookups[i];
 		
 		if (!lookup.name || lookup.name.includes(" ")) {
 			yield new Issue(Feedback.RP_MACRO_NAME_INVALID, lookup, <ul>
@@ -1574,7 +1574,7 @@ function* check_rp_lookups(current) {
 			yield new Issue(Feedback.RP_MACRO_BUILTIN_SHADOW, lookup, <ul><li><code>{lookup.name}</code> is a built-in formatter name.</li></ul>);
 		}
 		
-		let caseCollisions = current.rp.scriptLookups.filter(x => x !== lookup && x.name.toLowerCase() === lookup.name.toLowerCase() && x.name !== lookup.name);
+		let caseCollisions = rp.scriptLookups.filter(x => x !== lookup && x.name.toLowerCase() === lookup.name.toLowerCase() && x.name !== lookup.name);
 		if (caseCollisions.length > 0 && caseCollisions.every(x => lookup.name < x)) {
 			let conflictList = <Fragment>{caseCollisions.map((x, i) => 
 				<Fragment key={i}>{i == 0 ? '' : ', '} <code>{x}</code></Fragment>
@@ -1625,11 +1625,11 @@ function* check_rp_lookups(current) {
 	}
 }
 
-function* check_rp_display_strings(current) {
+function* check_rp_display_strings(rp) {
 	const builtInMacros = new Set(['Number', 'Unsigned', 'Score', 'Centiseconds', 'Seconds', 'Minutes', 'Fixed1', 'Fixed2', 'Fixed3', 'Float1', 'Float2', 'Float3', 'Float4', 'Float5', 'Float6', 'ASCIIChar', 'UnicodeChar']);
 	
-	for (let i = 0; i < current.rp.displayStrings.length; i++) {
-		let ds = current.rp.displayStrings[i];
+	for (let i = 0; i < rp.displayStrings.length; i++) {
+		let ds = rp.displayStrings[i];
 		
 		if (!ds.isDefault) {
 			if (!ds.conditionStr || ds.conditionStr.trim() === "") {
@@ -1670,10 +1670,10 @@ function* check_rp_display_strings(current) {
 				continue;
 			}
 			
-			let exactMatch = current.rp.scriptLookups.some(x => x.name === part.text);
+			let exactMatch = rp.scriptLookups.some(x => x.name === part.text);
 			if (!exactMatch) {
 				let suggestion = <Fragment></Fragment>;
-				let caseMatch = current.rp.scriptLookups.find(x => x.name.toLowerCase() === part.text.toLowerCase());
+				let caseMatch = rp.scriptLookups.find(x => x.name.toLowerCase() === part.text.toLowerCase());
 				if (caseMatch) suggestion = <ul>
 						<li><em>Did you mean <code>&#123;{caseMatch.name}&#125;</code>? Macro names are case-sensitive.</em></li>
 					</ul>;
@@ -1694,20 +1694,20 @@ function* check_rp_display_strings(current) {
 	}
 }
 
-function* check_rp_dynamic(current)
+function* check_rp_dynamic(rp)
 {
-	if (!current.rp.displayStrings.some(x => !x.isDefault))
+	if (!rp.displayStrings.some(x => !x.isDefault))
 	{
-		if (!current.rp.displayStrings.some(ds => ds.parts.some(p => p.isMacro)))
+		if (!rp.displayStrings.some(ds => ds.parts.some(p => p.isMacro)))
 			yield new Issue(Feedback.NO_DYNAMIC_RP, null);
 		else
 			yield new Issue(Feedback.NO_CONDITIONAL_DISPLAY, null);
 	}
 }
 
-function* check_rp_default(current)
+function* check_rp_default(rp, current)
 {
-	let defaults = current.rp.displayStrings.filter(x => x.isDefault);
+	let defaults = rp.displayStrings.filter(x => x.isDefault);
 	if (defaults.length == 0) {
 		yield new Issue(Feedback.NO_DEFAULT_RP, null);
 	} else if (defaults.length > 1) {
@@ -1723,7 +1723,7 @@ function* check_rp_default(current)
 	}
 }
 
-function* check_rp_notes(current)
+function* check_rp_notes(rp, current)
 {
 	function* get_rp_notes_issues(logic, where)
 	{
@@ -1767,7 +1767,7 @@ function* check_rp_notes(current)
 		}
 	}
 
-	for (const [di, d] of current.rp.display.entries())
+	for (const [di, d] of rp.display.entries())
 	{
 		if (d.condition != null)
 			yield* get_rp_notes_issues(d.condition, <>condition of display #{di+1}</>);
@@ -1976,15 +1976,17 @@ export function assess_code_notes(current)
 export function assess_rich_presence(current)
 {
 	let res = new Assessment();
-	current.rp ??= new RichPresence(); // if there is no RP, just use a placeholder
+	let rp = current.rp || new RichPresence(); // if there is no RP, just use a placeholder
 
-	res.stats = generate_rich_presence_stats(current.rp);
+	console.debug(current.rp, rp)
 
-	res.issues.push(IssueGroup.fromTests("Logic & Design", RICH_PRESENCE_TESTS, current));
+	res.stats = generate_rich_presence_stats(rp);
+
+	res.issues.push(IssueGroup.fromTests("Logic & Design", RICH_PRESENCE_TESTS, rp, current));
 
 	// attach feedback to the asset
 	// if this was a placeholder, it will fall off here
-	return current.rp.feedback = res;
+	return rp.feedback = res;
 }
 
 export function assess_set(current)
