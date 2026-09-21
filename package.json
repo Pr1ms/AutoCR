@@ -2,14 +2,14 @@
   "name": "autocr",
   "version": "0.1.0",
   "dependencies": {
-    "react": "^19",
-    "react-dom": "^19"
+    "react": "^18",
+    "react-dom": "^18"
   },
   "private": true,
   "scripts": {
-    "dev": "bun --hot ./index.html",
-    "build": "bun build ./index.html --outdir=dist --sourcemap --target=browser --minify --define:process.env.NODE_ENV='\"production\"' --env='BUN_PUBLIC_*'",
-    "start": "NODE_ENV=production bunx serve dist/ -l 8080"
+    "dev": "bun ./index.html --console",
+    "build": "bun build ./index.html --production --sourcemap=linked --outdir=dist",
+    "start": "bunx serve dist/ -l 8080"
   },
   "type": "module"
 }
