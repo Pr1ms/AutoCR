@@ -1978,10 +1978,8 @@ export function assess_rich_presence(current)
 	let res = new Assessment();
 	let rp = current.rp || new RichPresence(); // if there is no RP, just use a placeholder
 
-	console.debug(current.rp, rp)
-
 	res.stats = generate_rich_presence_stats(rp);
-
+	
 	res.issues.push(IssueGroup.fromTests("Logic & Design", RICH_PRESENCE_TESTS, rp, current));
 
 	// attach feedback to the asset
